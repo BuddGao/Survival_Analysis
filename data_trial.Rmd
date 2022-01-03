@@ -1,0 +1,128 @@
+---
+title: "new trial"
+author: "Youyuan(Keviant) Kong"
+date: "2022/1/2"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+```{r}
+  cancer_data<-read.table("UNC4_curated.txt",header=TRUE) 
+  cancer_data_sliced<-cancer_data %>% 
+  select(10,11,15,16,17,18) %>% 
+  mutate(TRT=1,AGE=as.numeric(age_at_initial_pathologic_diagnosis)) %>% 
+  select(-2) %>% 
+  mutate(FAILTIME=as.numeric(days_to_death)) %>% 
+  drop_na() %>% 
+  mutate(FAILCENS=as.numeric(recode(vital_status,"living"=0,"deceased"=1))) %>% 
+  select(-2,-3,-4,-5) %>% 
+  mutate(SEX=as.numeric(N)) %>% 
+  select(-1) %>% 
+  relocate(1,3,4,2,5) %>% 
+  mutate(mean_age=mean(AGE),
+         AGE=AGE-mean_age) %>% 
+  select(-6)
+  
+
+  
+  cancer_data<-read.table("GSE48091_curated.txt",header=TRUE) 
+  cancer_data_sliced<-cancer_data %>% 
+  select(10,11,15,16,17,18) %>% 
+  mutate(TRT=1,AGE=as.numeric(age_at_initial_pathologic_diagnosis)) %>% 
+  select(-2) %>% 
+  mutate(FAILTIME=as.numeric(days_to_death)) %>% 
+  drop_na() %>% 
+  mutate(FAILCENS=as.numeric(recode(vital_status,"living"=0,"deceased"=1))) %>% 
+  select(-2,-3,-4,-5) %>% 
+  mutate(SEX=as.numeric(N)) %>% 
+  select(-1) %>% 
+  relocate(1,3,4,2,5) %>% 
+  mutate(mean_age=mean(AGE),
+         AGE=AGE-mean_age) %>% 
+  select(-6)  
+  
+  
+
+
+
+original_data=cancer_data_sliced%>%filter(TRT%in%c(1))%>%arrange(FAILTIME)
+original_data=original_data[-105,]
+data1=preprocessed(original_data)
+
+#original_data=read.csv("C:/Users/baoshen/Desktop/zero_1.csv")
+#original_data=original_data[,-1]
+
+#write.csv(tRzero_1,file="C:/Users/baoshen/Desktop/zero_1.csv",,row.names = TRUE)
+#data1=read.csv(file="C:/Users/baode.gao16/Desktop/tRzero_1.csv")
+#data1=data1[,-1]
+#data1=data1[,-8]
+
+lista=modeling(data1)
+print(lista[1:5])
+tRzero_1=lista[[6]]
+tRcount=lista[[7]]
+tRs_t=lista[[8]]
+tRpi1=lista[[9]]
+tRpi2=lista[[10]]
+tRalpha=lista[[11]]
+tRz=lista[[12]]
+tRbeta2=lista[[3]]
+tRlambda2=lista[[4]]
+tRbeta1=lista[[1]]
+tRlambda1=lista[[2]]
+tRw=lista[[5]]
+data_km=subset(tRzero_1,select=-interval)
+listb=KM(data_km)
+datakm=listb[[1]]
+km=listb[[2]]
+
+Beta11=numeric()
+Beta12=numeric()
+Beta13=numeric()
+Lambda1=numeric()
+Beta21=numeric()
+Beta22=numeric()
+Lambda2=numeric()
+W1=numeric()
+W2=numeric()
+W3=numeric()
+timess=0
+for(i in 1:10){
+  datat=bootstrap(tRzero_1,tRcount,tRs_t,tRpi1,tRpi2,tRalpha,tRbeta2,tRz,tRlambda2,datakm,km)
+##  listbs=tryCatch(modeling1(datat,tRbeta1,tRlambda1,tRbeta2,tRlambda2,tRw),error=function(e) NULL,warning=function(e) NULL)
+  listbs=modeling1(datat1,tRbeta1,tRlambda1,tRbeta2,tRlambda2,tRw)
+  if(class(listbs)=="list"){
+    Beta11[i]=listbs[[1]][1]
+    Beta12[i]=listbs[[1]][2]
+    Beta13[i]=listbs[[1]][3]
+    Lambda1[i]=listbs[[2]]
+    Beta21[i]=listbs[[3]][1]
+    Beta22[i]=listbs[[3]][2]
+    Lambda2[i]=listbs[[4]]
+    W1[i]=listbs[[5]][1]
+    W2[i]=listbs[[5]][2]
+    W3[i]=listbs[[5]][3]
+  }
+  timess=timess+1
+  print(timess)
+  
+}
+print(Beta11)
+print(Beta12)
+print(Beta13)
+print(Lambda1)
+print(Beta21)
+print(Beta22)
+print(Lambda2)
+print(W1)
+print(W2)
+print(W3)
+
+
+```
