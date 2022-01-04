@@ -136,7 +136,9 @@ L1<-function(data,par,m,z,delta)
   pi2=pi1*exp(par[5])    
   pi1=1/(1+pi1)
   pi2=1/(1+pi2)
-  L1=sum(m[,1]*log(pi2)+delta*m[,2]*log(1-pi2)+m[,3]*log(pi1)+delta*m[,4]*log(1-pi1))
+  
+  L1=sum(m[,1]*log(pi2)+m[,2]*log(1-pi2)+m[,3]*log(pi1)+m[,4]*log(1-pi1)) 
+  
   return(-L1)
 }
 
@@ -155,6 +157,7 @@ L2<-function(data,m,d,pa,count,z)
     summ=sum(m1*exp(pa[1]*z1+pa[2]*z2+pa[3]*z3+pa[4])+m3*exp(pa[1]*z1+pa[2]*z2+pa[3]*z3))
     L2=L2+log(exp(pa[1]*sum(z1[1:count[i]])+pa[2]*sum(z2[1:count[i]])+pa[3]*sum(z3[1:count[i]])+
                     sum(d[k:(k+count[i]-1)])*pa[4])/(summ)^(count[i]))
+    
   }
   return(-L2)
 }
@@ -169,7 +172,7 @@ L3<-function(data,d,pa,z)
 library(survival)
 library(smcure)
 library(dplyr)
-data1=read.csv(file = "C:/Users/baode.gao16/Desktop/melanomadata.csv")
+data1=read.csv(file = "melanomadata.csv")
 data1=data1%>%arrange(t)
 data2=preprocessed(data1)
 data3=processed(data2)
@@ -268,10 +271,10 @@ for(i in 1:dim(zero_1)[1])
 { 
   s0=s_t[zero_1$interval[i]]
   h0=h_t[zero_1$interval[i]]
-  s1=s0^exp(beta2%*%z[i,2:4])
-  s2=s0^exp(beta2%*%z[i,2:4]+lambda2)
+  s1=s0^exp(beta2%*%z[i,2:3])
+  s2=s0^exp(beta2%*%z[i,2:3]+lambda2)
   
-  p[i]=log((1-alpha[i])*(pi2[i]*h0*s2*exp(beta2%*%z[i,2:4]+lambda2))^(1-delta[i])*(s2*pi2[i]+1-pi2[i])^delta[i]+
-             alpha[i]*(pi1[i]*h0*s1*exp(beta2%*%z[i,2:4]))^(1-delta[i])*(s1*pi1[i]+1-pi1[i])^delta[i])
+  p[i]=log((1-alpha[i])*(pi2[i]*h0*s2*exp(beta2%*%z[i,2:3]+lambda2))^(1-delta[i])*(s2*pi2[i]+1-pi2[i])^delta[i]+
+             alpha[i]*(pi1[i]*h0*s1*exp(beta2%*%z[i,2:3]))^(1-delta[i])*(s1*pi1[i]+1-pi1[i])^delta[i])
 } 
 print(sum(p))
